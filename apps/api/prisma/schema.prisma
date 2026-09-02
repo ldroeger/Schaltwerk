@@ -55,6 +55,7 @@ model Project {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   name           String
   address        String?
+  shareToken     String?      @unique // gesetzt via POST /projects/:id/share -> öffentlicher Lesezugriff
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -124,6 +125,10 @@ enum SymbolCategory {
   VERTEILER
   RCD
   LS_SCHALTER
+  RELAIS
+  SCHUETZ
+  DIREKTVERBINDER
+  ZAEHLER
   KLEMME
   SAMMELSCHIENE
   SONSTIGES
@@ -179,9 +184,15 @@ enum TopologyNodeType {
   EINSPEISUNG
   HAUPTSCHALTER
   ZAEHLER
+  PV_ZAEHLER          // Varianten der Einspeisung: PV-Einspeisezähler
+  WAERMEPUMPE_ZAEHLER // Varianten der Einspeisung: separater Wärmepumpenzähler
+  UNTERVERTEILER      // Anlage mehrerer Unterverteilungen
   SAMMELSCHIENE
   RCD
   LS_SCHALTER
+  RELAIS
+  SCHUETZ
+  DIREKTVERBINDER     // Direktverbinder / potenzialfreie Kontakte
   KLEMME
   VERBRAUCHER
   KNX_LINIE
@@ -235,7 +246,24 @@ model KnxProject {
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   areaCount   Int      @default(1)
   lineCount   Int      @default(1)
+  // Adressschema für die automatische GA-Vorschlagsfunktion:
+  addressLevels  Int    @default(3) // 3 = Haupt/Mittel/Untergruppe, 2 = Haupt/Untergruppe
+  groupSortBy    String @default("FUNCTION") // "FUNCTION" | "ROOM" — bestimmt Hauptgruppen-Zuordnung
   devices     KnxDevice[]
+  groupPrefixes KnxGroupPrefix[]
+}
+
+model KnxGroupPrefix {
+  id           String     @id @default(cuid())
+  knxProjectId String
+  knxProject   KnxProject @relation(fields: [knxProjectId], references: [id], onDelete: Cascade)
+  /** "main" für Hauptgruppen, "mid:<mainGroup>" für Mittelgruppen innerhalb einer Hauptgruppe. */
+  scope        String     @default("main")
+  /** Funktions- oder Raumname, dem eine feste Gruppennummer zugeordnet ist (z.B. "Schalten" -> 1). */
+  key          String
+  mainGroup    Int
+
+  @@unique([knxProjectId, scope, key])
 }
 
 model KnxDevice {

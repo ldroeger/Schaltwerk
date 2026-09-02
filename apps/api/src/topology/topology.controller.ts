@@ -7,7 +7,7 @@ import { RolesGuard } from "../auth/roles.guard";
 import { Roles } from "../auth/roles.decorator";
 
 interface CreateTopologyNodeDto {
-  nodeType: string; parentId?: string; label: string; catalogItemId?: string;
+  nodeType: string; parentId?: string; label?: string; catalogItemId?: string;
 }
 interface UpdateParentDto { newParentId: string; }
 
@@ -36,5 +36,11 @@ export class TopologyController {
   @Get("unplaced")
   getUnplaced(@Param("projectId") projectId: string) {
     return this.service.getUnplacedComponents(projectId);
+  }
+
+  @Roles("OWNER", "PLANNER")
+  @Post("renumber")
+  renumber(@Param("projectId") projectId: string) {
+    return this.service.renumberProject(projectId);
   }
 }

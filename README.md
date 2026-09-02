@@ -43,7 +43,18 @@ Auto-Layout-Algorithmus und Modul-Beschreibungen.
 - `apps/web`: `next build` ✅ (Next.js 15.5.21 / React 19, gepatchte Version — siehe [Next.js-Sicherheitsupdate 12/2025](https://nextjs.org/blog/security-update-2025-12-11))
 - CI: `.github/workflows/ci.yml` prüft alle drei Services + `docker compose config` bei jedem Push/PR
 
-Bekannte MVP-Einschränkungen: Kabellängen in der Stückliste sind eine Pauschal-Heuristik statt PostGIS-Distanzberechnung, DIN-EN-60617-/DIN-18015-Symbole sind Platzhalter-SVGs, `@nestjs/cli`-Build-Tooling hat ungepatchte transitive Dev-Dependencies (nicht Teil des Produktions-Bundles), kein Einladungs-Flow für weitere Org-Mitglieder.
+Bekannte MVP-Einschränkungen: Kabellängen in der Stückliste sind eine Pauschal-Heuristik statt PostGIS-Distanzberechnung, DIN-EN-60617-/DIN-18015-Symbole sind Platzhalter-SVGs, `@nestjs/cli`-Build-Tooling hat ungepatchte transitive Dev-Dependencies (nicht Teil des Produktions-Bundles), kein Einladungs-Flow für weitere Org-Mitglieder, Next.js' optionale `sharp`-Abhängigkeit (nur für `next/image`, hier ungenutzt) hat ungepatchte transitive `libvips`-CVEs — Fix erfordert Next.js-16-Major-Upgrade.
+
+## Abgleich mit stromlaufplan.de / myElectricPlan
+
+Feature-Abgleich gegen die offizielle Dokumentation beider Referenzprodukte (Stand: siehe Commit-Historie). Ergänzt in dieser Runde:
+
+- **Automatische Nummerierung** von RCDs/Sicherungen (`-F1`, `-F2`, …) und Klemmleisten (`-X1`, …) beim Anlegen, plus `POST /projects/:id/topology/renumber` zum Neu-Durchnummerieren nach Umbauten
+- **Weitere Elementtypen**: Relais/Schaltgeräte, Schütze, Direktverbinder/potenzialfreie Kontakte, Unterverteiler (mehrere Unterverteilungen), PV-/Wärmepumpenzähler (Varianten der Einspeisung)
+- **KNX-Gruppenadressverwaltung** (vorher fehlte das komplett — es gab nur den Export!): Geräte anlegen (`POST .../knx/devices`), Adressschema konfigurieren (2-/3-stufig, Sortierung nach Funktion oder Raum), automatischer Adressvorschlag (`GET .../knx/group-addresses/suggest`) mit fester Zuordnung von Funktionen/Räumen zu Haupt-/Mittelgruppen, Konfliktprüfung beim Zuweisen
+- **Projekt teilen / QR-Code**: `POST /projects/:id/share` erzeugt einen öffentlichen, unauthentifizierten Lese-Link; Frontend rendert ihn als QR-Code (`ShareProjectButton`), öffentliche Ansicht unter `/share/[token]`
+
+Bewusst nicht nachgebaut (zu großer Umfang / proprietäre Drittanbieter-Formate ohne offene Spezifikation): Loxone-/Busch-free@home-/Homematic-IP-Wired-/DALI-Elementbibliotheken, "Freies Zeichnen"-Modus (freihändig statt Baum), DWG-/SVG-Plan-Export, jetplan.de-/Gira-GPLA-Schnittstellen, Board-/Spalten-Vorlagen für den Schaltschrank, Hersteller-Artikelkatalog (Hager/ABB/Siemens) mit echten Preisen, Undo/Redo-Historie im Grundriss-Editor, mehrere Einheiten/Stockwerke pro Projekt.
 
 ## Auth & Multi-Tenancy
 

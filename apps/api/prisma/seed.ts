@@ -27,6 +27,22 @@ const CATALOG_ITEMS = [
   { code: "REG-KLEMME-REIHENKLEMME", category: "KLEMME", label: "Reihenklemme 2,5mm²", svgIconUrl: "symbols/klemme.svg", teWidth: 1 },
   { code: "REG-KNX-AKTOR-8FACH", category: "KNX_AKTOR", label: "KNX-Schaltaktor 8-fach, 16A", svgIconUrl: "symbols/knx-aktor.svg", teWidth: 4 },
   { code: "REG-KNX-DIMMAKTOR-4FACH", category: "KNX_AKTOR", label: "KNX-Dimmaktor 4-fach", svgIconUrl: "symbols/knx-dimmaktor.svg", teWidth: 6 },
+
+  // Elemente für konventionelle Installationen (Relais/Schaltgeräte, Schütze)
+  { code: "REG-RELAIS-1S-16A", category: "RELAIS", label: "Koppelrelais 1S, 16A", svgIconUrl: "symbols/relais.svg", teWidth: 1 },
+  { code: "REG-RELAIS-2W-16A", category: "RELAIS", label: "Koppelrelais 2W, 16A", svgIconUrl: "symbols/relais.svg", teWidth: 1 },
+  { code: "REG-SCHUETZ-25A-1S", category: "SCHUETZ", label: "Leistungsschütz 25A, 1S", svgIconUrl: "symbols/schuetz.svg", teWidth: 3 },
+  { code: "REG-SCHUETZ-40A-3S", category: "SCHUETZ", label: "Leistungsschütz 40A, 3S", svgIconUrl: "symbols/schuetz.svg", teWidth: 4 },
+
+  // Direktverbinder / potenzialfreie Kontakte
+  { code: "REG-DIREKTVERBINDER", category: "DIREKTVERBINDER", label: "Direktverbinder (potenzialfrei)", svgIconUrl: "symbols/direktverbinder.svg", teWidth: null },
+
+  // Varianten der Einspeisung
+  { code: "REG-ZAEHLER-PV", category: "ZAEHLER", label: "PV-Einspeisezähler", svgIconUrl: "symbols/zaehler-pv.svg", teWidth: 3 },
+  { code: "REG-ZAEHLER-WAERMEPUMPE", category: "ZAEHLER", label: "Wärmepumpenzähler", svgIconUrl: "symbols/zaehler-wp.svg", teWidth: 3 },
+
+  // Unterverteilung (Anlage mehrerer Unterverteilungen)
+  { code: "REG-UNTERVERTEILER", category: "VERTEILER", label: "Unterverteiler-Anschluss", svgIconUrl: "symbols/unterverteiler.svg", teWidth: 3 },
 ] as const;
 
 async function main() {

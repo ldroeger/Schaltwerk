@@ -9,7 +9,7 @@ import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 import { ProjectAccessGuard } from "./auth/project-access.guard";
 import { RolesGuard } from "./auth/roles.guard";
 
-import { ProjectsController } from "./projects/projects.controller";
+import { ProjectsController, PublicShareController } from "./projects/projects.controller";
 import { ProjectsService } from "./projects/projects.service";
 
 import { TopologyController } from "./topology/topology.controller";
@@ -20,6 +20,7 @@ import { BomController } from "./bom/bom.controller";
 import { BomService } from "./bom/bom.service";
 import { KnxController } from "./knx/knx.controller";
 import { EtsExportService } from "./knx/ets-export.service";
+import { KnxAddressService } from "./knx/knx-address.service";
 import { TestReportController } from "./test-reports/test-report.controller";
 import { TestReportService } from "./test-reports/test-report.service";
 import { TestReportPdfService } from "./test-reports/test-report-pdf.service";
@@ -37,7 +38,7 @@ import { SymbolCatalogController } from "./floorplan/symbol-catalog.controller";
   ],
   controllers: [
     AuthController,
-    ProjectsController,
+    ProjectsController, PublicShareController,
     TopologyController, CabinetController, BomController,
     KnxController, TestReportController,
     FloorPlanController, SymbolCatalogController,
@@ -48,7 +49,7 @@ import { SymbolCatalogController } from "./floorplan/symbol-catalog.controller";
     ProjectsService,
     JwtAuthGuard, ProjectAccessGuard, RolesGuard,
     TopologyService, CabinetService, BomService,
-    EtsExportService, TestReportService, TestReportPdfService,
+    EtsExportService, KnxAddressService, TestReportService, TestReportPdfService,
     FloorPlanService,
   ],
 })

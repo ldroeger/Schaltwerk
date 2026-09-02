@@ -5,9 +5,15 @@
   let mapping = (
     "RCD": "symbols/rcd.svg",
     "LS_SCHALTER": "symbols/ls.svg",
+    "RELAIS": "symbols/relais.svg",
+    "SCHUETZ": "symbols/schuetz.svg",
+    "DIREKTVERBINDER": "symbols/direktverbinder.svg",
     "KLEMME": "symbols/klemme.svg",
     "VERBRAUCHER": "symbols/verbraucher.svg",
     "HAUPTSCHALTER": "symbols/hauptschalter.svg",
+    "UNTERVERTEILER": "symbols/unterverteiler.svg",
+    "PV_ZAEHLER": "symbols/zaehler-pv.svg",
+    "WAERMEPUMPE_ZAEHLER": "symbols/zaehler-wp.svg",
   )
   mapping.at(node-type, default: "symbols/generic.svg")
 }
