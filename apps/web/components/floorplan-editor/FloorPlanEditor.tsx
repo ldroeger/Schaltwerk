@@ -18,19 +18,31 @@ interface RoomGeoJson {
 }
 
 export default function FloorPlanEditor({
-  floorPlanId, imageUrl, scalePxPerM: initialScale,
-}: { floorPlanId: string; imageUrl: string; scalePxPerM: number }) {
+  floorPlanId, imageUrl, scalePxPerM: initialScale, selectedSymbolId, onSymbolPlaced,
+}: {
+  floorPlanId: string;
+  imageUrl: string;
+  scalePxPerM: number;
+  /** Vom übergeordneten Element (Symbolbibliothek-Auswahl) gesetzte Katalog-ID. */
+  selectedSymbolId: string | null;
+  /** Wird nach erfolgreicher Platzierung aufgerufen, damit der Elternzustand zurückgesetzt wird. */
+  onSymbolPlaced: () => void;
+}) {
   const [image] = useImage(imageUrl);
   const [mode, setMode] = useState<EditorMode>("VIEW");
   const [scalePxPerM, setScalePxPerM] = useState(initialScale);
   const [calibPoints, setCalibPoints] = useState<{ x: number; y: number }[]>([]);
   const [currentRoomPoints, setCurrentRoomPoints] = useState<{ x: number; y: number }[]>([]);
   const [rooms, setRooms] = useState<RoomGeoJson[]>([]);
-  const [pendingSymbolCatalogId, setPendingSymbolCatalogId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRoomsWithGeometry(floorPlanId).then(setRooms);
   }, [floorPlanId]);
+
+  // Sobald die Symbolbibliothek eine Auswahl meldet, in den Platzierungsmodus wechseln.
+  useEffect(() => {
+    if (selectedSymbolId) setMode("PLACE_SYMBOL");
+  }, [selectedSymbolId]);
 
   // Konvertiert Bildschirm-Pixel in Weltkoordinaten (Meter) anhand der Kalibrierung
   function toWorld(px: number, py: number) {
@@ -61,7 +73,7 @@ export default function FloorPlanEditor({
       return;
     }
 
-    if (mode === "PLACE_SYMBOL" && pendingSymbolCatalogId) {
+    if (mode === "PLACE_SYMBOL" && selectedSymbolId) {
       // Vereinfachung: Symbol wird dem ersten Raum zugeordnet, der den Klickpunkt enthält.
       // Produktiv: ST_Contains-Abfrage serverseitig oder Point-in-Polygon clientseitig.
       const targetRoom = rooms[0];
@@ -69,11 +81,11 @@ export default function FloorPlanEditor({
         alert("Bitte zuerst einen Raum zeichnen.");
         return;
       }
-      await placeSymbolOnFloorPlan(targetRoom.id, pendingSymbolCatalogId, toWorld(pos.x, pos.y));
+      await placeSymbolOnFloorPlan(targetRoom.id, selectedSymbolId, toWorld(pos.x, pos.y));
       const refreshed = await fetchRoomsWithGeometry(floorPlanId);
       setRooms(refreshed);
       setMode("VIEW");
-      setPendingSymbolCatalogId(null);
+      onSymbolPlaced();
     }
   }
 

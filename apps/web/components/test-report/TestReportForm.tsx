@@ -15,10 +15,14 @@ interface MeasurementDto {
   polarityOk: boolean | null;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
 export default function TestReportForm({
+  projectId,
   reportId,
   measurements,
 }: {
+  projectId: string;
   reportId: string;
   measurements: MeasurementDto[];
 }) {
@@ -110,7 +114,7 @@ export default function TestReportForm({
       </table>
 
       <a
-        href={`/api/projects/test-reports/${reportId}/export.pdf`}
+        href={`${API_URL}/projects/${projectId}/test-reports/${reportId}/export.pdf`}
         className="mt-4 inline-block px-4 py-2 bg-slate-800 text-white rounded"
       >
         Prüfbericht als PDF exportieren

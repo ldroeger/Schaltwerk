@@ -36,6 +36,15 @@ Auto-Layout-Algorithmus und Modul-Beschreibungen.
 - PDF: Typst CLI
 - Containerisierung: Docker Compose
 
+## Verifizierungsstatus
+
+- `apps/pdf-service`: `tsc --noEmit` ✅, `npm run build` ✅
+- `apps/api`: `tsc --noEmit` ✅ (Prisma-Client-Typen setzen `prisma generate` mit Netzwerkzugriff auf `binaries.prisma.sh` voraus)
+- `apps/web`: `next build` ✅ (Next.js 15.5.21 / React 19, gepatchte Version — siehe [Next.js-Sicherheitsupdate 12/2025](https://nextjs.org/blog/security-update-2025-12-11))
+- CI: `.github/workflows/ci.yml` prüft alle drei Services + `docker compose config` bei jedem Push/PR
+
+Bekannte MVP-Einschränkungen: keine Auth/Multi-Tenancy, Kabellängen in der Stückliste sind eine Pauschal-Heuristik statt PostGIS-Distanzberechnung, DIN-EN-60617-/DIN-18015-Symbole sind Platzhalter-SVGs.
+
 ## Lizenz
 
 MIT

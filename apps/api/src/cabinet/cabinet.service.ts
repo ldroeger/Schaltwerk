@@ -14,7 +14,9 @@ export class CabinetService {
 
     const row = await this.prisma.cabinetRow.findUniqueOrThrow({ where: { id: rowId }, include: { slots: true } });
 
-    const overlap = row.slots.some((s) => startTE < s.startTE + s.widthTE && startTE + widthTE > s.startTE);
+    const overlap = row.slots.some(
+      (s: { startTE: number; widthTE: number }) => startTE < s.startTE + s.widthTE && startTE + widthTE > s.startTE
+    );
     if (overlap) throw new ConflictException("Slot-Bereich bereits belegt.");
     if (startTE + widthTE > row.totalTE) throw new ConflictException("Außerhalb der Reihenbreite.");
 

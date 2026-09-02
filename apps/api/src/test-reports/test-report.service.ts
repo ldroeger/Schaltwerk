@@ -39,7 +39,7 @@ export class TestReportService {
         projectId,
         inspector,
         measurements: {
-          create: relevantNodes.map((node) => ({
+          create: relevantNodes.map((node: { id: string }) => ({
             topologyNodeId: node.id,
             // Messwerte initial leer — nur die Zuordnung wird vorbefüllt
           })),

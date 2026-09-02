@@ -28,7 +28,7 @@ export class BomService {
       this.addLine(lines, { key: s.catalogItem.code, articleName: s.catalogItem.label, articleNumber: s.catalogItemId, unit: "Stk", sourceType: "SYMBOL" });
     }
 
-    const leafConsumers = nodes.filter((n) => n.nodeType === "VERBRAUCHER");
+    const leafConsumers = nodes.filter((n: { nodeType: string }) => n.nodeType === "VERBRAUCHER");
     if (leafConsumers.length > 0) {
       this.addLine(lines, {
         key: "CABLE-NYM-3X1.5", articleName: "NYM-J 3x1,5mm²", articleNumber: null, unit: "m",
