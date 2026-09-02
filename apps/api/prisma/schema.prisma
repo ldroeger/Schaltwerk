@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+// ============ PROJEKT & GRUNDRISS ============
+
+model Project {
+  id            String   @id @default(cuid())
+  name          String
+  address       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  floorPlans    FloorPlan[]
+  rooms         Room[]
+  topologyNodes TopologyNode[]
+  cabinets      Cabinet[]
+  knxProject    KnxProject?
+  testReports   TestReport[]
+  bomItems      BomItem[]
+}
+
+model FloorPlan {
+  id          String        @id @default(cuid())
+  projectId   String
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fileUrl     String
+  fileType    FloorPlanType
+  scalePxPerM Float
+  originX     Float         @default(0)
+  originY     Float         @default(0)
+  pageIndex   Int           @default(0)
+  rooms       Room[]
+}
+
+enum FloorPlanType {
+  PNG
+  JPG
+  SVG
+  PDF
+}
+
+model Room {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  floorPlanId String
+  floorPlan   FloorPlan @relation(fields: [floorPlanId], references: [id])
+  name        String
+  roomType    String?
+  boundary    Unsupported("geometry(Polygon, 0)")
+  symbols     InstallationSymbol[]
+}
+
+// ============ SYMBOLE / INSTALLATIONSELEMENTE ============
+
+model SymbolCatalogItem {
+  id                String   @id @default(cuid())
+  code              String   @unique
+  category          SymbolCategory
+  label             String
+  svgIconUrl        String
+  teWidth           Int?
+  defaultAttributes Json     @default("{}")
+  installationSymbols InstallationSymbol[]
+  topologyNodes     TopologyNode[]
+}
+
+enum SymbolCategory {
+  STECKDOSE
+  SCHALTER
+  LEUCHTE
+  KNX_SENSOR
+  KNX_AKTOR
+  VERTEILER
+  RCD
+  LS_SCHALTER
+  KLEMME
+  SAMMELSCHIENE
+  SONSTIGES
+}
+
+model InstallationSymbol {
+  id            String   @id @default(cuid())
+  roomId        String
+  room          Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  catalogItemId String
+  catalogItem   SymbolCatalogItem @relation(fields: [catalogItemId], references: [id])
+  position      Unsupported("geometry(Point, 0)")
+  rotationDeg   Float    @default(0)
+  label         String?
+  circuitId     String?
+  circuit       TopologyNode? @relation("SymbolCircuit", fields: [circuitId], references: [id])
+}
+
+// ============ TOPOLOGIE (Stromlaufplan-Baum) ============
+
+model TopologyNode {
+  id               String   @id @default(cuid())
+  projectId        String
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parentId         String?
+  parent           TopologyNode? @relation("NodeTree", fields: [parentId], references: [id])
+  children         TopologyNode[] @relation("NodeTree")
+
+  nodeType         TopologyNodeType
+  catalogItemId    String?
+  catalogItem      SymbolCatalogItem? @relation(fields: [catalogItemId], references: [id])
+
+  label            String
+  phases           Phase[] @default([L1])
+  ratedCurrentA    Float?
+  rcdType          String?
+  rcdSensitivityMa Int?
+  poles            Int      @default(1)
+  orderIndex       Int      @default(0)
+
+  cabinetSlot      CabinetSlot?
+  knxAddress       KnxDevice?
+  symbols          InstallationSymbol[] @relation("SymbolCircuit")
+  measurements     Measurement[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([projectId, parentId])
+}
+
+enum TopologyNodeType {
+  EINSPEISUNG
+  HAUPTSCHALTER
+  ZAEHLER
+  SAMMELSCHIENE
+  RCD
+  LS_SCHALTER
+  KLEMME
+  VERBRAUCHER
+  KNX_LINIE
+}
+
+enum Phase {
+  L1
+  L2
+  L3
+  N
+  PE
+}
+
+// ============ SCHALTSCHRANK / GRID-LAYOUT ============
+
+model Cabinet {
+  id        String @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  rows      CabinetRow[]
+}
+
+model CabinetRow {
+  id       String  @id @default(cuid())
+  cabinetId String
+  cabinet  Cabinet @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  rowIndex Int
+  totalTE  Int     @default(24)
+  rowLabel String?
+  slots    CabinetSlot[]
+}
+
+model CabinetSlot {
+  id             String       @id @default(cuid())
+  rowId          String
+  row            CabinetRow   @relation(fields: [rowId], references: [id], onDelete: Cascade)
+  topologyNodeId String       @unique
+  topologyNode   TopologyNode @relation(fields: [topologyNodeId], references: [id], onDelete: Cascade)
+  startTE        Int
+  widthTE        Int
+
+  @@unique([rowId, startTE])
+}
+
+// ============ KNX ============
+
+model KnxProject {
+  id          String   @id @default(cuid())
+  projectId   String   @unique
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  areaCount   Int      @default(1)
+  lineCount   Int      @default(1)
+  devices     KnxDevice[]
+}
+
+model KnxDevice {
+  id              String   @id @default(cuid())
+  knxProjectId    String
+  knxProject      KnxProject @relation(fields: [knxProjectId], references: [id], onDelete: Cascade)
+  topologyNodeId  String   @unique
+  topologyNode    TopologyNode @relation(fields: [topologyNodeId], references: [id])
+  physicalAddress String
+  groupAddresses  KnxGroupAddress[]
+}
+
+model KnxGroupAddress {
+  id       String    @id @default(cuid())
+  deviceId String
+  device   KnxDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  address  String
+  function String
+  dpt      String
+}
+
+// ============ PRÜFPROTOKOLL (VDE 0100-600) ============
+
+model TestReport {
+  id           String   @id @default(cuid())
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  inspector    String
+  measurements Measurement[]
+}
+
+model Measurement {
+  id                      String     @id @default(cuid())
+  testReportId            String
+  testReport              TestReport @relation(fields: [testReportId], references: [id], onDelete: Cascade)
+  topologyNodeId          String
+  topologyNode            TopologyNode @relation(fields: [topologyNodeId], references: [id])
+
+  isolationResistanceMOhm Float?
+  loopImpedanceOhm        Float?
+  rcdTripCurrentMa        Int?
+  rcdTripTimeMs           Int?
+  continuityOk            Boolean?
+  polarityOk              Boolean?
+  notes                   String?
+}
+
+// ============ STÜCKLISTE (BOM) ============
+
+model BomItem {
+  id            String  @id @default(cuid())
+  projectId     String
+  project       Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  articleName   String
+  articleNumber String?
+  quantity      Int
+  unit          String  @default("Stk")
+  sourceType    String
+  sourceId      String?
+}
