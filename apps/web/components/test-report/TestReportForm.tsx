@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { updateMeasurement } from "@/lib/api-client";
+import { authFetch } from "@/lib/auth-client";
 
 interface MeasurementDto {
   id: string;
@@ -14,8 +15,6 @@ interface MeasurementDto {
   continuityOk: boolean | null;
   polarityOk: boolean | null;
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export default function TestReportForm({
   projectId,
@@ -36,7 +35,7 @@ export default function TestReportForm({
   async function handleBlurSave(id: string) {
     const row = rows.find((r) => r.id === id);
     if (!row) return;
-    const { warnings: newWarnings } = await updateMeasurement(id, {
+    const { warnings: newWarnings } = await updateMeasurement(projectId, reportId, id, {
       isolationResistanceMOhm: row.isolationResistanceMOhm,
       loopImpedanceOhm: row.loopImpedanceOhm,
       rcdTripCurrentMa: row.rcdTripCurrentMa,
@@ -113,13 +112,42 @@ export default function TestReportForm({
         </tbody>
       </table>
 
-      <a
-        href={`${API_URL}/projects/${projectId}/test-reports/${reportId}/export.pdf`}
-        className="mt-4 inline-block px-4 py-2 bg-slate-800 text-white rounded"
-      >
-        Prüfbericht als PDF exportieren
-      </a>
+      <ExportPdfButton projectId={projectId} reportId={reportId} />
     </div>
+  );
+}
+
+function ExportPdfButton({ projectId, reportId }: { projectId: string; reportId: string }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleExport() {
+    setLoading(true);
+    try {
+      // Geschützter Endpunkt -> Download per authFetch (mit Bearer-Token)
+      // statt <a href>, da normale Browser-Navigation keinen Authorization-
+      // Header mitschickt.
+      const res = await authFetch(`/projects/${projectId}/test-reports/${reportId}/export.pdf`);
+      if (!res.ok) throw new Error("Export fehlgeschlagen.");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `pruefprotokoll-${reportId}.pdf`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={handleExport}
+      disabled={loading}
+      className="mt-4 px-4 py-2 bg-slate-800 text-white rounded disabled:opacity-50"
+    >
+      {loading ? "Wird exportiert…" : "Prüfbericht als PDF exportieren"}
+    </button>
   );
 }
 

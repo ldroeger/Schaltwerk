@@ -37,6 +37,12 @@ Vollständige Konzeption in vier Teilen:
      Topologie-Knoten, Installationssymbolen und einer Kabellängen-Heuristik
      (produktiv: PostGIS `ST_Distance` statt Pauschalwert).
 
+5. **Auth & Multi-Tenancy** — `apps/api/src/auth`, `apps/api/src/projects`
+   `Organization`/`User`/`Membership` im Schema, JWT-basierte Authentifizierung
+   (`JwtAuthGuard`, global via `@Public()`-Ausnahme für Login/Register) sowie
+   `ProjectAccessGuard` zur Durchsetzung der Mandantengrenze auf allen
+   `:projectId`-Routen. Details siehe README-Abschnitt "Auth & Multi-Tenancy".
+
 ## Docker Compose
 
 `docker-compose.yml` startet vier Services: `postgres` (PostGIS), `api` (NestJS +

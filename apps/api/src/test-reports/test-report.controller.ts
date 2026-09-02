@@ -1,9 +1,12 @@
 // apps/api/src/test-reports/test-report.controller.ts
-import { Body, Controller, Get, Param, Patch, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Res, UseGuards } from "@nestjs/common";
 import type { Response } from "express";
 import { TestReportService } from "./test-report.service";
 import { TestReportPdfService } from "./test-report-pdf.service";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { ProjectAccessGuard } from "../auth/project-access.guard";
 
+@UseGuards(JwtAuthGuard, ProjectAccessGuard)
 @Controller("projects/:projectId/test-reports")
 export class TestReportController {
   constructor(

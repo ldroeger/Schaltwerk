@@ -1,9 +1,11 @@
 // apps/api/src/floorplan/floorplan.controller.ts
 import {
-  Body, Controller, Get, Param, Post, UploadedFile, UseInterceptors,
+  Body, Controller, Get, Param, Post, UploadedFile, UseInterceptors, UseGuards,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { FloorPlanService } from "./floorplan.service";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { ProjectAccessGuard } from "../auth/project-access.guard";
 
 interface CalibrateDto {
   pointA: { x: number; y: number };
@@ -24,6 +26,7 @@ interface PlaceSymbolDto {
   label?: string;
 }
 
+@UseGuards(JwtAuthGuard, ProjectAccessGuard)
 @Controller("projects/:projectId/floorplans")
 export class FloorPlanController {
   constructor(private readonly service: FloorPlanService) {}

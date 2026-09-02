@@ -1,6 +1,16 @@
 // apps/api/src/app.module.ts
 import { Module } from "@nestjs/common";
+import { JwtModule } from "@nestjs/jwt";
 import { PrismaService } from "./prisma/prisma.service";
+
+import { AuthController } from "./auth/auth.controller";
+import { AuthService } from "./auth/auth.service";
+import { JwtAuthGuard } from "./auth/jwt-auth.guard";
+import { ProjectAccessGuard } from "./auth/project-access.guard";
+
+import { ProjectsController } from "./projects/projects.controller";
+import { ProjectsService } from "./projects/projects.service";
+
 import { TopologyController } from "./topology/topology.controller";
 import { TopologyService } from "./topology/topology.service";
 import { CabinetController } from "./cabinet/cabinet.controller";
@@ -17,13 +27,26 @@ import { FloorPlanService } from "./floorplan/floorplan.service";
 import { SymbolCatalogController } from "./floorplan/symbol-catalog.controller";
 
 @Module({
+  imports: [
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET ?? "dev-secret-change-me",
+      signOptions: { expiresIn: "12h" },
+    }),
+  ],
   controllers: [
+    AuthController,
+    ProjectsController,
     TopologyController, CabinetController, BomController,
     KnxController, TestReportController,
     FloorPlanController, SymbolCatalogController,
   ],
   providers: [
-    PrismaService, TopologyService, CabinetService, BomService,
+    PrismaService,
+    AuthService,
+    ProjectsService,
+    JwtAuthGuard, ProjectAccessGuard,
+    TopologyService, CabinetService, BomService,
     EtsExportService, TestReportService, TestReportPdfService,
     FloorPlanService,
   ],

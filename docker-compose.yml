@@ -33,6 +33,7 @@ services:
       PORT: 4000
       PDF_SERVICE_URL: http://pdf-service:5000
       UPLOAD_DIR: /data/uploads
+      JWT_SECRET: ${JWT_SECRET:-change_me_to_a_long_random_string}
     volumes:
       - uploads:/data/uploads
     ports:

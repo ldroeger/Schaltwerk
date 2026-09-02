@@ -1,8 +1,11 @@
 // apps/api/src/knx/knx.controller.ts
-import { Controller, Get, Param, Res } from "@nestjs/common";
+import { Controller, Get, Param, Res, UseGuards } from "@nestjs/common";
 import type { Response } from "express";
 import { EtsExportService } from "./ets-export.service";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { ProjectAccessGuard } from "../auth/project-access.guard";
 
+@UseGuards(JwtAuthGuard, ProjectAccessGuard)
 @Controller("projects/:projectId/knx")
 export class KnxController {
   constructor(private readonly etsExport: EtsExportService) {}

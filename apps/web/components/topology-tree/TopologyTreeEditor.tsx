@@ -44,9 +44,9 @@ export default function TopologyTreeEditor({ projectId }: { projectId: string })
 
   const onConnect = useCallback(async (connection: Connection) => {
     if (!connection.source || !connection.target) return;
-    await updateNodeParent(connection.target, connection.source);
+    await updateNodeParent(projectId, connection.target, connection.source);
     setEdges((eds) => addEdge(connection, eds));
-  }, [setEdges]);
+  }, [setEdges, projectId]);
 
   return (
     <div className="h-[80vh] w-full border rounded-lg">

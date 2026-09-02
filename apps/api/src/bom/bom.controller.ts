@@ -1,8 +1,11 @@
 // apps/api/src/bom/bom.controller.ts
-import { Controller, Get, Param, Res } from "@nestjs/common";
+import { Controller, Get, Param, Res, UseGuards } from "@nestjs/common";
 import type { Response } from "express";
 import { BomService } from "./bom.service";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { ProjectAccessGuard } from "../auth/project-access.guard";
 
+@UseGuards(JwtAuthGuard, ProjectAccessGuard)
 @Controller("projects/:projectId/bom")
 export class BomController {
   constructor(private readonly service: BomService) {}
