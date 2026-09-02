@@ -12,15 +12,20 @@ import { EtsExportService } from "./knx/ets-export.service";
 import { TestReportController } from "./test-reports/test-report.controller";
 import { TestReportService } from "./test-reports/test-report.service";
 import { TestReportPdfService } from "./test-reports/test-report-pdf.service";
+import { FloorPlanController } from "./floorplan/floorplan.controller";
+import { FloorPlanService } from "./floorplan/floorplan.service";
+import { SymbolCatalogController } from "./floorplan/symbol-catalog.controller";
 
 @Module({
   controllers: [
     TopologyController, CabinetController, BomController,
     KnxController, TestReportController,
+    FloorPlanController, SymbolCatalogController,
   ],
   providers: [
     PrismaService, TopologyService, CabinetService, BomService,
     EtsExportService, TestReportService, TestReportPdfService,
+    FloorPlanService,
   ],
 })
 export class AppModule {}

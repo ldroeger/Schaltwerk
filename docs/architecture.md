@@ -21,7 +21,13 @@ Vollständige Konzeption in vier Teilen:
    auch bei vielen Seiten.
 
 4. **Module**
-   - Grundriss-Editor: Frontend via Konva.js (Canvas), Backend über `Room`/`InstallationSymbol`.
+   - Grundriss-Editor: `apps/api/src/floorplan` (Upload via Multer, Skalierungs-
+     Kalibrierung über zwei Referenzpunkte + bekannten Realabstand, Raum-Polygone
+     und Symbolpositionen per Raw-SQL gegen PostGIS geschrieben/gelesen, da Prisma
+     `Unsupported("geometry(...)")`-Felder nicht direkt (de)serialisiert).
+     Frontend: `apps/web/components/floorplan-editor` (Konva.js-Canvas mit
+     Kalibrier-/Zeichen-/Platzierungs-Modi) + `symbol-library` (DIN-18015-Katalog,
+     geseedet über `apps/api/prisma/seed.ts`).
    - Topologie-Baum: React Flow (`apps/web/components/topology-tree`).
    - Schaltschrank-Grid: Snap-to-Grid via `@dnd-kit/core` (`apps/web/components/cabinet-grid`).
    - KNX/ETS-Export: `apps/api/src/knx/ets-export.service.ts` (CSV 3-Level-Format + vereinfachtes XML).
