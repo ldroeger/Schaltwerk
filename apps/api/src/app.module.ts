@@ -7,6 +7,7 @@ import { AuthController } from "./auth/auth.controller";
 import { AuthService } from "./auth/auth.service";
 import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 import { ProjectAccessGuard } from "./auth/project-access.guard";
+import { RolesGuard } from "./auth/roles.guard";
 
 import { ProjectsController } from "./projects/projects.controller";
 import { ProjectsService } from "./projects/projects.service";
@@ -45,7 +46,7 @@ import { SymbolCatalogController } from "./floorplan/symbol-catalog.controller";
     PrismaService,
     AuthService,
     ProjectsService,
-    JwtAuthGuard, ProjectAccessGuard,
+    JwtAuthGuard, ProjectAccessGuard, RolesGuard,
     TopologyService, CabinetService, BomService,
     EtsExportService, TestReportService, TestReportPdfService,
     FloorPlanService,

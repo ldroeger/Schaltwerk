@@ -2,6 +2,8 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { ProjectsService } from "./projects.service";
 import { JwtAuthGuard, AuthenticatedUser } from "../auth/jwt-auth.guard";
+import { RolesGuard } from "../auth/roles.guard";
+import { Roles } from "../auth/roles.decorator";
 import { CurrentUser } from "../auth/current-user.decorator";
 
 interface CreateProjectDto {
@@ -9,7 +11,7 @@ interface CreateProjectDto {
   address?: string;
 }
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller("projects")
 export class ProjectsController {
   constructor(private readonly service: ProjectsService) {}
@@ -19,6 +21,7 @@ export class ProjectsController {
     return this.service.listForOrganization(user.organizationId);
   }
 
+  @Roles("OWNER", "PLANNER")
   @Post()
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateProjectDto) {
     return this.service.create(user.organizationId, dto.name, dto.address);

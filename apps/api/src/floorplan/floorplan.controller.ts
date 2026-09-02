@@ -6,6 +6,8 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { FloorPlanService } from "./floorplan.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { ProjectAccessGuard } from "../auth/project-access.guard";
+import { RolesGuard } from "../auth/roles.guard";
+import { Roles } from "../auth/roles.decorator";
 
 interface CalibrateDto {
   pointA: { x: number; y: number };
@@ -26,22 +28,25 @@ interface PlaceSymbolDto {
   label?: string;
 }
 
-@UseGuards(JwtAuthGuard, ProjectAccessGuard)
+@UseGuards(JwtAuthGuard, ProjectAccessGuard, RolesGuard)
 @Controller("projects/:projectId/floorplans")
 export class FloorPlanController {
   constructor(private readonly service: FloorPlanService) {}
 
+  @Roles("OWNER", "PLANNER")
   @Post()
   @UseInterceptors(FileInterceptor("file"))
   upload(@Param("projectId") projectId: string, @UploadedFile() file: Express.Multer.File) {
     return this.service.uploadFloorPlan(projectId, file);
   }
 
+  @Roles("OWNER", "PLANNER")
   @Post(":floorPlanId/calibrate")
   calibrate(@Param("floorPlanId") floorPlanId: string, @Body() dto: CalibrateDto) {
     return this.service.calibrateScale(floorPlanId, dto.pointA, dto.pointB, dto.realDistanceM);
   }
 
+  @Roles("OWNER", "PLANNER")
   @Post(":floorPlanId/rooms")
   createRoom(
     @Param("projectId") projectId: string,
@@ -56,6 +61,7 @@ export class FloorPlanController {
     return this.service.getRoomsWithGeometry(floorPlanId);
   }
 
+  @Roles("OWNER", "PLANNER")
   @Post("rooms/:roomId/symbols")
   placeSymbol(@Param("roomId") roomId: string, @Body() dto: PlaceSymbolDto) {
     return this.service.placeSymbol(roomId, dto.catalogItemId, dto.position, dto.rotationDeg, dto.label);

@@ -43,7 +43,7 @@ Auto-Layout-Algorithmus und Modul-Beschreibungen.
 - `apps/web`: `next build` ✅ (Next.js 15.5.21 / React 19, gepatchte Version — siehe [Next.js-Sicherheitsupdate 12/2025](https://nextjs.org/blog/security-update-2025-12-11))
 - CI: `.github/workflows/ci.yml` prüft alle drei Services + `docker compose config` bei jedem Push/PR
 
-Bekannte MVP-Einschränkungen: Kabellängen in der Stückliste sind eine Pauschal-Heuristik statt PostGIS-Distanzberechnung, DIN-EN-60617-/DIN-18015-Symbole sind Platzhalter-SVGs, `@nestjs/cli`-Build-Tooling hat ungepatchte transitive Dev-Dependencies (nicht Teil des Produktions-Bundles).
+Bekannte MVP-Einschränkungen: Kabellängen in der Stückliste sind eine Pauschal-Heuristik statt PostGIS-Distanzberechnung, DIN-EN-60617-/DIN-18015-Symbole sind Platzhalter-SVGs, `@nestjs/cli`-Build-Tooling hat ungepatchte transitive Dev-Dependencies (nicht Teil des Produktions-Bundles), kein Einladungs-Flow für weitere Org-Mitglieder.
 
 ## Auth & Multi-Tenancy
 
@@ -51,7 +51,8 @@ Bekannte MVP-Einschränkungen: Kabellängen in der Stückliste sind eine Pauscha
 - **Auth-Flow:** `POST /auth/register` legt Nutzer + neue Organisation an (Ersteller wird `OWNER`), `POST /auth/login` liefert ein JWT (12h gültig, `JWT_SECRET` per Env).
 - **Guards:** `JwtAuthGuard` (global, außer mit `@Public()` markierte Routen) prüft das Bearer-Token. `ProjectAccessGuard` prüft zusätzlich für jede Route mit `:projectId`-Pfadparameter, dass das Projekt zur Organisation des angemeldeten Nutzers gehört — angewendet auf Topology-, FloorPlan-, KNX-, TestReport- und BOM-Controller. Für `CabinetController` (kein `:projectId` im Pfad) läuft die Mandantenprüfung stattdessen im Service über die Cabinet→Project→Organisation-Kette.
 - **Frontend:** `apps/web/lib/auth-client.ts` kapselt Login/Register/Token-Storage (`localStorage`) und stellt `authFetch()` bereit, das den Bearer-Token automatisch anhängt und bei 401 zur Login-Seite umleitet. Alle API-Clients (`api-client.ts`, `floorplan-api-client.ts`) laufen darüber.
-- **Noch offen:** Einladungs-Flow für weitere Nutzer einer bestehenden Organisation, Rollenprüfung (aktuell wird `role` nur im JWT mitgeführt, aber nicht an Endpunkten durchgesetzt — z.B. sollte `VIEWER` keine Schreibzugriffe erhalten), Refresh-Tokens (aktuell einfaches 12h-Access-Token ohne Rotation).
+- **Noch offen:** Einladungs-Flow für weitere Nutzer einer bestehenden Organisation, Refresh-Tokens (aktuell einfaches 12h-Access-Token ohne Rotation).
+- **Rollen-Enforcement:** `@Roles("OWNER", "PLANNER")` + `RolesGuard` sperren alle schreibenden Endpunkte (Topology-Knoten anlegen/verschieben, Grundriss-Upload/Kalibrierung/Raum/Symbol, Schaltschrank-Platzierung, Projekt anlegen, Prüfprotokoll anlegen/Messwerte eintragen) für `VIEWER`. Lesezugriffe (inkl. PDF-/CSV-/XML-Exporte) bleiben für alle drei Rollen offen, z.B. für reine Kunden-Einsicht.
 
 ## Lizenz
 

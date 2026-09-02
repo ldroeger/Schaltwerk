@@ -5,8 +5,10 @@ import { TestReportService } from "./test-report.service";
 import { TestReportPdfService } from "./test-report-pdf.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { ProjectAccessGuard } from "../auth/project-access.guard";
+import { RolesGuard } from "../auth/roles.guard";
+import { Roles } from "../auth/roles.decorator";
 
-@UseGuards(JwtAuthGuard, ProjectAccessGuard)
+@UseGuards(JwtAuthGuard, ProjectAccessGuard, RolesGuard)
 @Controller("projects/:projectId/test-reports")
 export class TestReportController {
   constructor(
@@ -14,6 +16,7 @@ export class TestReportController {
     private readonly pdfService: TestReportPdfService
   ) {}
 
+  @Roles("OWNER", "PLANNER")
   @Post()
   create(@Param("projectId") projectId: string, @Body() dto: { inspector: string }) {
     return this.service.createWithPrefill(projectId, dto.inspector);
@@ -24,6 +27,7 @@ export class TestReportController {
     return this.service.getReport(reportId);
   }
 
+  @Roles("OWNER", "PLANNER")
   @Patch(":reportId/measurements/:measurementId")
   updateMeasurement(
     @Param("measurementId") measurementId: string,
@@ -32,6 +36,7 @@ export class TestReportController {
     return this.service.updateMeasurement(measurementId, dto as any);
   }
 
+  // Lesend (auch für VIEWER, z.B. Kunden-Einsicht in den fertigen Prüfbericht)
   @Get(":reportId/export.pdf")
   async exportPdf(@Param("reportId") reportId: string, @Res() res: Response) {
     const report = await this.service.getReport(reportId);

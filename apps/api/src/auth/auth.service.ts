@@ -36,7 +36,7 @@ export class AuthService {
       include: { memberships: { include: { organization: true } } },
     });
 
-    return this.issueToken(user.id, user.email, user.memberships[0].organizationId);
+    return this.issueToken(user.id, user.email, user.memberships[0].organizationId, user.memberships[0].role);
   }
 
   async login(email: string, password: string) {
